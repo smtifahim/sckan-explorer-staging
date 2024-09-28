@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="./js/stardog.js"></script>
+  <script src="./js/stardog-db-query.js"></script>
+  <script src="./js/sparql-query-texts.js"></script>
+  <title>Stardog SCKAN Database Status</title>
+</head>
+<body>
+  <p id="statusMessage"> SCKAN Database Connection Status: Retreiving data from Stardog NPO. Please wait for a moment... </p>
+
+  <script>
+    const db_test = 'NPO';
+    const test_query = sckan_version_info;
+
+   async function runStardogQuery() 
+    {
+      var message = "SCKAN Database Connection Status: ";
+      try
+      {
+          var queryResults = await executeDBQuery(conn, db_test, test_query);
+          if (queryResults.length > 0)
+          {
+           var sckan_version = "SCKAN Version: " + queryResults[0].sckan_version.value;
+           setStatusMessage( message + "SUCCESS. ", sckan_version);
+          }
+      } 
+      catch (error)
+      {
+        console.error(error);
+        setStatusMessage( message + "FAILED. ", "" );
+      }
+    }
+    
+    // Function to set the status message based on success or failure
+    function setStatusMessage(status, message) 
+    {
+      const statusMessageElement = document.getElementById("statusMessage");
+      statusMessageElement.textContent = status + " " + message;
+    }
+
+    // Call this function when the page is loaded
+    window.onload = function()
+    {
+      runStardogQuery();
+    };
+  </script>
+</body>
+</html>
