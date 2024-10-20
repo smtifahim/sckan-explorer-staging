@@ -9,6 +9,19 @@ class AdjTableData
         }
     }
 
+class AdjTable
+    {
+        constructor (nt, v1, v1_type, v2, v2_type, is_synapse)
+        {
+            this.neuron = nt;
+            this.v1 = v1;
+            this.v1_type = v1_type;
+            this.v2 = v2;
+            this.v2_type = v2_type;
+            this.is_synapse = is_synapse;
+        }
+    }
+
 class NeuronPathDiGraph
     {
         constructor (neuron_id, diGraph)
@@ -18,10 +31,18 @@ class NeuronPathDiGraph
         }
     }
 
+class NeuronWithSynapse 
+    {
+        constructor (neuron_id, next_neuron)
+        {
+            this.neuronID = neuron_id;
+            this.next_neuron = next_neuron;
+        }
+    }
 
 class AtoBviaC
     {
-        constructor (nt, a, b=null, c=null, neuron_metadata, target_organ, di_graph = "")
+        constructor (nt, a, b=null, c=null, neuron_metadata, target_organ, di_graph = "", di_graph_synapse = "")
         {
             this.neuron = nt;
             this.origin = a;
@@ -30,6 +51,7 @@ class AtoBviaC
             this.neuronMetaData = neuron_metadata;
             this.targetOrgan = target_organ;
             this.diGraph = di_graph;
+            this.diGraphSynapse = di_graph_synapse;
         }
     }
   
