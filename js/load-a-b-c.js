@@ -169,8 +169,8 @@ async function loadABCData()
         var neuronAdj = npo_poset.filter(obj => obj.neuron.ID === n_id);
         
         var diGraph  = 'strict digraph {'; 
-            diGraph += 'label = "[' + neuronAdj[0].neuron.ID + '] ' 
-                                    + splitTextIntoLines(neuronAdj[0].neuron.Label,70) + '";\n';
+            diGraph += 'label = <<br/><b> [' + neuronAdj[0].neuron.ID + '] </b>' 
+                                    + splitTextIntoLines(neuronAdj[0].neuron.Label,70, true) + '>\n';
           
             diGraph += getDiGraphEdges(neuronAdj, false);
             diGraph += '}';
@@ -191,17 +191,43 @@ async function loadABCData()
       var neuronAdj = npo_poset.filter(obj => obj.neuron.ID === n_id);
       
       var diGraph  = 'strict digraph {'; 
-          diGraph += 'label = "[' + neuronAdj[0].neuron.ID + '] ' 
-                                  + splitTextIntoLines(neuronAdj[0].neuron.Label,70) + '";\n';
+          // diGraph += 'label = "[' + neuronAdj[0].neuron.ID + '] ' 
+          //                         + splitTextIntoLines(neuronAdj[0].neuron.Label,70) + '";\n';
+          
+          diGraph += 'label = <<br/><b> [' + neuronAdj[0].neuron.ID + '] </b>' 
+                                  + splitTextIntoLines(neuronAdj[0].neuron.Label, 70, true);
+
         
+      if (neuron_with_synapse.next_neuron !== null)
+        {           
+          diGraph += '<br/><br/> <b>Note: </b><b><FONT COLOR="blue">' + neuronAdj[0].neuron.ID 
+                  + '</FONT> </b>&nbsp;has forward connections with following population(s):';
+
+
+          // Add labels for the next synaptically connected  neurons 
+          for (i = 0; i < neuron_with_synapse.next_neuron.length; i++)
+          {
+            var neuron_id = neuron_with_synapse.next_neuron[i];
+            if (neuron_id!= "")
+            {  
+             // console.log ("NEXT NEURON: " + neuron_id);
+              diGraph += '<br/><br/><b><FONT COLOR="blue">[' + neuron_id + ']</FONT>&nbsp;</b><br/>' + splitTextIntoLines(getNeuronLabelFromID(neuron_id), 70, true);
+            }
+          }
+          diGraph += '>\n';
+          console.log (diGraph);
+        }
+          
           diGraph += getDiGraphEdges(neuronAdj, true);
 
-          if (neuron_with_synapse.next_neuron !== null)
+        if (neuron_with_synapse.next_neuron !== null)
           {
-            for (i = 0; i < neuron_with_synapse.next_neuron.length;i++)
+            // Add labels for the next synaptically connected  neurons
+            
+            for (i = 0; i < neuron_with_synapse.next_neuron.length; i++)
             {
               neuronAdj = npo_poset.filter(obj => obj.neuron.ID === neuron_with_synapse.next_neuron[i]);
-              diGraph += getDiGraphEdges(neuronAdj);
+              diGraph += getDiGraphEdges(neuronAdj, true);
             }
           }          
           
@@ -288,40 +314,47 @@ async function loadABCData()
       return nodeStyle;
     }
 
-    // For wrapping a long label for the nodes or the label of the neuron type in the digraph.
-    function splitTextIntoLines(text, maxChar) 
+// For wrapping a long label for the nodes or the label of the neuron type in the digraph.
+// Returns HTML version when html=true using <br/>; otherwise, returns plain text with \n.
+function splitTextIntoLines(text, maxChar, html = false)
+{
+  let lines = [];
+  let currentLine = "";
+
+  // Split text into words
+  const words = text.split(" ");
+
+  for (let i = 0; i < words.length; i++) 
     {
-      let lines = [];
-      let currentLine = "";
-    
-      // split text into words
-      const words = text.split(" ");
-    
-      for (let i = 0; i < words.length; i++) 
+      const word = words[i];
+
+      // to check if adding the next word exceeds the maxChar limit
+      if (currentLine.length + word.length + 1 <= maxChar)
       {
-        const word = words[i];
-    
-        if (currentLine.length + word.length + 1 <= maxChar)
-        {
-          // Add word to current line
-          if (currentLine === "")
-              currentLine = word;
-          else   
-              currentLine += " " + word;
-        } 
-        else 
-        {
-          // Start new line with current word
-          lines.push(currentLine);
-          currentLine = word;
-        }
+          // if currentLine is empty, simply assign the word
+          currentLine += (currentLine === "" ? "" : " ") + word;
       }
-      // Add last line
-      lines.push(currentLine);
-    
-      // Join lines with newline character
-      return lines.join("\\n");
+      else
+      {
+          // if currentLine is not empty, push it to lines first
+          if (currentLine.length > 0) 
+          {
+              lines.push(currentLine);
+          }
+          // Start new line with the current word
+          currentLine = word;
+      }
     }
+  // push the last line if it has content
+  if (currentLine.length > 0)
+  {
+      lines.push(currentLine);
+  }
+
+  // to join lines with <br/> for HTML or with \n for plain text
+  return html ? lines.join('<br/>') : lines.join('\n');
+}
+
     
     function getAtoBviaC(abc_data)
     {
