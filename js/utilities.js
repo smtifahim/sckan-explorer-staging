@@ -33,16 +33,17 @@ class NeuronPathDiGraph
 
 class NeuronWithSynapse 
     {
-        constructor (neuron_id, next_neuron)
+        constructor (neuron_id, next_neurons)
         {
             this.neuronID = neuron_id;
-            this.next_neuron = next_neuron;
+            this.next_neurons = next_neurons;
         }
     }
 
 class AtoBviaC
     {
-        constructor (nt, a, b=null, c=null, neuron_metadata, target_organ, di_graph = "", di_graph_synapse = "")
+        constructor (nt, a, b=null, c=null, neuron_metadata, target_organ, di_graph = "", 
+                    di_graph_synapse = "", synapsed_neurons= "")
         {
             this.neuron = nt;
             this.origin = a;
@@ -52,6 +53,7 @@ class AtoBviaC
             this.targetOrgan = target_organ;
             this.diGraph = di_graph;
             this.diGraphSynapse = di_graph_synapse;
+            this.synapsedNeurons = synapsed_neurons;
         }
     }
   

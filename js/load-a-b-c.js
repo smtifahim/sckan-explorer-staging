@@ -3,18 +3,14 @@
 
 // Database and queries
 // const dbName = 'NPO';
-// const qry1 = a_b_via_c;
-// const qry2 = npo_neuron_meta;
 // const qry3 = npo_partial_order;
 
 // Global variables
-var npo_poset = new Array();
-var npo_neuron_paths = new Array();
-var npo_neuron_paths_with_synapse = new Array();
-
-var npo_neurons_metadata = new Array();
-//var abc_data = new Array();
-var aToBviaC = new Array();
+var NPO_POSET = new Array();
+var NPO_NEURON_PATHS = new Array();
+var NPO_NEURON_PATHS_WITH_SYNAPSE = new Array();
+var NPO_NEURON_METADATA = new Array();
+var A_TO_B_VIA_C = new Array();
 
 
 // Not sending the query to the server. Using pre-generated json files instead.
@@ -26,34 +22,6 @@ var aToBviaC = new Array();
 //        return queryResults;
 //     } 
 //     catch (error) 
-//     {
-//       console.error(error);
-//       alert("Satrdog is not responding with query results.");
-//     }
-// }
-
-// async function getNeuronsMetaDataFromDB() 
-// {
-//     try 
-//     {
-//        var queryResults = await executeDBQuery(conn, dbName, qry2);
-//        return queryResults;
-//     } 
-//     catch (error) 
-//     {
-//       console.error(error);
-//       alert("Satrdog is not responding with query results.");
-//     }
-// }
-
-// async function getABCDataFromDB() 
-// {
-//     try 
-//     {
-//        var queryResults = await executeDBQuery(conn, dbName, qry1);
-//        return queryResults;
-//     } 
-//     catch (error)
 //     {
 //       console.error(error);
 //       alert("Satrdog is not responding with query results.");
@@ -80,27 +48,26 @@ function loadJSONFromFile(filename)
     return null;
   }
 }
-
 async function loadABCData()
 {
     //const neuronsMetaDataFromDB = await getNeuronsMetaDataFromDB();
     const neuronsMetaDataFromDB = loadJSONFromFile(json_directory + "neuron-metadata.json");
-    npo_neurons_metadata = getNeuronsMetaData(neuronsMetaDataFromDB);
+    NPO_NEURON_METADATA = getNeuronsMetaData(neuronsMetaDataFromDB);
 
     //const poDataFromDB = await getPartialOrderDataFromDB();
     const poDataFromDB = loadJSONFromFile(json_directory + "axonal-path.json");
 
-    npo_poset = getNPOPartialOrders(poDataFromDB);
+    NPO_POSET = getNPOPartialOrders(poDataFromDB);
     populateNPONeuronDiGraphs();
     
     //const abc_data = await getABCDataFromDB();
     const abc_data = loadJSONFromFile(json_directory + "a-b-via-c.json");
-    aToBviaC = getAtoBviaC(abc_data);
+    A_TO_B_VIA_C = getAtoBviaC(abc_data);
 
     // console.info("ATOBVIAC"); console.log (aToBviaC);
-    // console.info("Neurons MetaDATA"); console.log (npo_neurons_metadata);
-    // console.info("Neurons PARTIAL ORDER"); console.log (npo_poset);
-    // console.info ("NPO NEURON PATHS"); console.log (npo_neuron_paths);
+    // console.info("Neurons MetaDATA"); console.log (NPO_NEURON_METADATA);
+    // console.info("Neurons PARTIAL ORDER"); console.log (NPO_POSET);
+    // console.info ("NPO NEURON PATHS"); console.log (NPO_NEURON_PATHS);
 
     // Updated function for new axonal-path query
     function getNPOPartialOrders(poData)
@@ -111,7 +78,7 @@ async function loadABCData()
          var neuron_iri = poData[i].Neuron_Connected.value;
          var neuron_id = getCurieFromIRI(neuron_iri);
          
-         // get neuron label from npo_neurons_metadata
+         // get neuron label from NPO_NEURON_METADATA
          var neuron_label = getNeuronLabelFromID (neuron_id);
          var neuronType = new ClassEntity (neuron_id, neuron_iri, neuron_label);
          
@@ -120,7 +87,6 @@ async function loadABCData()
          var v1Label= poData[i].V1.value;
          var v1 = new ClassEntity(v1ID, v1IRI, v1Label);
          var v1Type = poData[i].V1_Type.value;
-
   
          var v2IRI = poData[i].V2_ID.value;
          var v2ID = getCurieFromIRI(v2IRI);
@@ -138,40 +104,48 @@ async function loadABCData()
     // get label from npo_neuron_metadata
     function getNeuronLabelFromID(neuronID) 
     {
-      const neuron = npo_neurons_metadata.find(neuron => neuron.neuronID === neuronID);
+      const neuron = NPO_NEURON_METADATA.find(neuron => neuron.neuronID === neuronID);
       return neuron ? neuron.neuronPrefLabel : null; // return neuronLabel if found, otherwise null
     }
 
     function populateNPONeuronDiGraphs()
     {
-      var neurons_with_poset = [...new Set(npo_poset.map(obj => obj.neuron.ID))];
+      var neurons_with_poset = [...new Set(NPO_POSET.map(obj => obj.neuron.ID))];
 
       for (let i = 0; i < neurons_with_poset.length; i++)
         {
           var diGraph = getDiGraph(neurons_with_poset[i]);
           var neuronPathDiGraph = new NeuronPathDiGraph(neurons_with_poset[i], diGraph);
-          npo_neuron_paths.push (neuronPathDiGraph );
+          NPO_NEURON_PATHS.push (neuronPathDiGraph );
 
           // For diGraph with Synaptic Forward Connections.
           var diGraphWithSynapse = getDiGraphWithSynapse (neurons_with_poset[i]);
           var neuronPathDiGraphWithSynapse = new NeuronPathDiGraph(neurons_with_poset[i], diGraphWithSynapse);
-          npo_neuron_paths_with_synapse.push (neuronPathDiGraphWithSynapse);
+          NPO_NEURON_PATHS_WITH_SYNAPSE.push (neuronPathDiGraphWithSynapse);
 
         }
 
-      // console.log (npo_neuron_paths);
-      // console.log (npo_neuron_paths[0].neuronID + npo_neuron_paths[0].diGraph);
+      // console.log (NPO_NEURON_PATHS);
+      // console.log (NPO_NEURON_PATHS[0].neuronID + NPO_NEURON_PATHS[0].diGraph);
     }
    
     // Updated function to add different color and style for the nodes
     function getDiGraph(n_id)
     {
-        var neuronAdj = npo_poset.filter(obj => obj.neuron.ID === n_id);
+        var neuronAdj = NPO_POSET.filter(obj => obj.neuron.ID === n_id);
         
-        var diGraph  = 'strict digraph {'; 
-            diGraph += 'label = <<br/><b> [' + neuronAdj[0].neuron.ID + '] </b>' 
-                                    + splitTextIntoLines(neuronAdj[0].neuron.Label,70, true) + '>\n';
-          
+        var diGraph  = 'strict digraph {';    
+            diGraph += 'label = <';            
+              
+            // to add label for the digraph in html table format
+            var htmlLabel = '<table border = "0" cellborder="0" cellspacing="2" cellpadding="5">';
+                // add an invisible row since graphviz does not support <br/> before the html table tag
+                htmlLabel += '<TR><TD BGCOLOR="white" HEIGHT="8" BORDER="0"></TD></TR>';
+                htmlLabel += "<tr><td BGCOLOR='#c7daff'><b>&nbsp;" + neuronAdj[0].neuron.ID + "</b>&nbsp;</td>";
+                htmlLabel += "<td BGCOLOR='#EFF5FB'>" + getFormattedNeuronLabel(neuronAdj[0].neuron.Label) + "</td></tr>";
+                htmlLabel += "</table>";
+            
+            diGraph += htmlLabel + '>\n';           
             diGraph += getDiGraphEdges(neuronAdj, false);
             diGraph += '}';
 
@@ -185,61 +159,56 @@ async function loadABCData()
       // Get connected neurons from NeuronMetadata in an array
       var connected_neurons = getConnectedNeurons(n_id).split(',').map(item => item.trim());
 
-      var neuron_with_synapse = new NeuronWithSynapse(n_id, connected_neurons);
-      // console.log ("Next for " + n_id + ": " + neuron_with_synapse.next_neuron);
-
-      var neuronAdj = npo_poset.filter(obj => obj.neuron.ID === n_id);
+      var neuronAdj = NPO_POSET.filter(obj => obj.neuron.ID === n_id);
       
-      var diGraph  = 'strict digraph {'; 
-          // diGraph += 'label = "[' + neuronAdj[0].neuron.ID + '] ' 
-          //                         + splitTextIntoLines(neuronAdj[0].neuron.Label,70) + '";\n';
+      var diGraph  = 'strict digraph {';
+          diGraph += 'label = <' ;
+
+          // to add label for the digraph in html table format
+          var htmlLabel = '<table border = "0" cellborder="0" cellspacing="2" cellpadding="5">';
+          // add an invisible row since graphviz does not support <br/> before the html table tag
+          htmlLabel += '<TR><TD BGCOLOR="white" HEIGHT="8" BORDER="0"></TD></TR>';
+          htmlLabel += "<tr><td BGCOLOR='#c7daff'><b>&nbsp;" + neuronAdj[0].neuron.ID + "</b>&nbsp;</td>";
+          htmlLabel += "<td BGCOLOR='#EFF5FB'>" + getFormattedNeuronLabel(neuronAdj[0].neuron.Label) + "</td></tr>";
           
-          diGraph += 'label = <<br/><b> [' + neuronAdj[0].neuron.ID + '] </b>' 
-                                  + splitTextIntoLines(neuronAdj[0].neuron.Label, 70, true);
-
-        
-      if (neuron_with_synapse.next_neuron !== null)
-        {           
-          diGraph += '<br/><br/> <b>Note: </b><b><FONT COLOR="blue">' + neuronAdj[0].neuron.ID 
-                  + '</FONT> </b>&nbsp;has forward connections with following population(s):';
-
-
+      if (connected_neurons !== null)
+        {
           // Add labels for the next synaptically connected  neurons 
-          for (i = 0; i < neuron_with_synapse.next_neuron.length; i++)
+          for (i = 0; i < connected_neurons.length; i++)
           {
-            var neuron_id = neuron_with_synapse.next_neuron[i];
-            if (neuron_id!= "")
-            {  
-             // console.log ("NEXT NEURON: " + neuron_id);
-              diGraph += '<br/><br/><b><FONT COLOR="blue">[' + neuron_id + ']</FONT>&nbsp;</b><br/>' + splitTextIntoLines(getNeuronLabelFromID(neuron_id), 70, true);
+            var neuron_id = connected_neurons[i];
+            var neuron_label = getNeuronLabelFromID(neuron_id);
+            if ( neuron_id !== "")
+            {            
+              htmlLabel += "<tr><td BGCOLOR='#c7daff'><b>&nbsp;" + neuron_id + "</b>&nbsp;</td>";
+              htmlLabel += "<td BGCOLOR='#EFF5FB'>" + getFormattedNeuronLabel(neuron_label) + "</td></tr>";
             }
           }
-          diGraph += '>\n';
-          console.log (diGraph);
-        }
-          
-          diGraph += getDiGraphEdges(neuronAdj, true);
+          htmlLabel += "</table>";    
 
-        if (neuron_with_synapse.next_neuron !== null)
-          {
-            // Add labels for the next synaptically connected  neurons
+          diGraph += htmlLabel + '>\n';
+        }
             
-            for (i = 0; i < neuron_with_synapse.next_neuron.length; i++)
+        diGraph += getDiGraphEdges(neuronAdj, true);
+
+        if (connected_neurons !== null)
+          {
+            // Add nodes and edges for the synaptically connected  neurons
+            for (i = 0; i < connected_neurons.length; i++)
             {
-              neuronAdj = npo_poset.filter(obj => obj.neuron.ID === neuron_with_synapse.next_neuron[i]);
+              neuronAdj = NPO_POSET.filter(obj => obj.neuron.ID === connected_neurons[i]);
               diGraph += getDiGraphEdges(neuronAdj, true);
             }
-          }          
-          
+          }
           diGraph += '}';
 
       return diGraph;
-    }
+    } // end of function getDiGraphWithSynapse()
 
     // get connected neuron from npo_neuron_metadata
     function getConnectedNeurons(neuronID) 
     {
-      const neuron = npo_neurons_metadata.find(neuron => neuron.neuronID === neuronID);
+      const neuron = NPO_NEURON_METADATA.find(neuron => neuron.neuronID === neuronID);
       return neuron ? neuron.forwardConnections : null; // return forward connections if found, otherwise null
     }
 
@@ -249,7 +218,7 @@ async function loadABCData()
       const synapseNodeStyle = `shape=rect, style="rounded, filled", fillcolor="#eefaec", peripheries=2, color="blue"`;
 
       var diGraph = "";
-      for (let i=0; i < neuronAdj.length; i++)
+      for (let i = 0; i < neuronAdj.length; i++)
         { 
           // V1 Node formatting
           let v1NodeStyle = ""; var v1Type = neuronAdj[i].v1_type;
@@ -268,19 +237,17 @@ async function loadABCData()
               v2NodeStyle = synapseNodeStyle;
           }
 
-            const v1_text = neuronAdj[i].v1.ID + "\\n"
-                          + splitTextIntoLines(neuronAdj[i].v1.Label, 26)
-            const v2_text = neuronAdj[i].v2.ID + "\\n"
-                          + splitTextIntoLines(neuronAdj[i].v2.Label, 26)
-            
-            diGraph += `"${v1_text}" [label="${v1_text}", ${v1NodeStyle}];\n`;
-            diGraph += `"${v2_text}" [label="${v2_text}", ${v2NodeStyle}];\n`;
-            // add edge
-            diGraph += `"${v1_text}" -> "${v2_text}";\n`;
-          // diGraph += `"${v1_text}" -> "${v2_text}" [label= "${neuronAdj[i].neuron.ID}"];\n`;
+          const v1_text = neuronAdj[i].v1.ID + "\\n"
+                        + splitTextIntoLines(neuronAdj[i].v1.Label, 26)
+          const v2_text = neuronAdj[i].v2.ID + "\\n"
+                        + splitTextIntoLines(neuronAdj[i].v2.Label, 26)
+          
+          diGraph += `"${v1_text}" [label="${v1_text}", ${v1NodeStyle}];\n`;
+          diGraph += `"${v2_text}" [label="${v2_text}", ${v2NodeStyle}];\n`;
+          // add edge
+          diGraph += `"${v1_text}" -> "${v2_text}";\n`;
         }
         return diGraph;
-
     }
 
   // get node style for the digraph based on node type  
@@ -294,22 +261,17 @@ async function loadABCData()
       
       var nodeStyle = "";
 
-      if (nodeType === "hasSomaLocation") 
-        {
+      if (nodeType === "hasSomaLocation")
           nodeStyle = somaNodeStyle;
-        } 
-           if (nodeType === "hasAxonLocation" || nodeType === "hasAxonLeadingToSensoryTerminal") 
-          {
-              nodeStyle = axonNodeStyle;
-          } 
-               if (nodeType === "hasSensoryAxonTerminalLocation")
-              {
-                  nodeStyle = sensoryNodeStyle;
-              }
-                 if (nodeType === "hasAxonTerminalLocation")
-                  {
-                    nodeStyle = axonTerminalNodeStyle;
-                  }
+      
+      if (nodeType === "hasAxonLocation" || nodeType === "hasAxonLeadingToSensoryTerminal")
+          nodeStyle = axonNodeStyle;
+      
+      if (nodeType === "hasSensoryAxonTerminalLocation")
+          nodeStyle = sensoryNodeStyle;
+      
+      if (nodeType === "hasAxonTerminalLocation")
+          nodeStyle = axonTerminalNodeStyle;
 
       return nodeStyle;
     }
@@ -355,9 +317,58 @@ function splitTextIntoLines(text, maxChar, html = false)
   return html ? lines.join('<br/>') : lines.join('\n');
 }
 
-    
-    function getAtoBviaC(abc_data)
-    {
+function getFormattedNeuronLabel(neuronLabel, maxChar = 100) {
+  let labelLines = [];
+  
+  // Bold "to" and "via" and add a space after
+  let formattedLabel = neuronLabel.replace(/(\b(to|via)\b)/g, '<b>$1</b>&nbsp;');
+  
+  // Split formatted label into words
+  const words = formattedLabel.split(" ");
+  let currentLine = "";
+  let isFirstLine = true;
+
+  words.forEach((word) => {
+    // Check if we're on the first line and "via" is encountered
+    if (isFirstLine && word.toLowerCase() === "<b>via</b>&nbsp;") {
+      // Add the current line without "via" and start the next line with "via"
+      if (currentLine.trim().length > 0) {
+        labelLines.push(currentLine.trim());
+      }
+      currentLine = word; // "via" starts the next line
+      isFirstLine = false;
+    }
+    else if (currentLine.length + word.length + 1 <= maxChar) {
+      // Add word to current line if within maxChar limit
+      currentLine += (currentLine === "" ? "" : " ") + word;
+    } else {
+      // For subsequent lines, if "via" is the last word before maxChar, move it to the next line
+      if (currentLine.endsWith("<b>via</b>&nbsp;")) {
+        currentLine = currentLine.slice(0, currentLine.lastIndexOf("<b>via</b>&nbsp;")).trim();
+        labelLines.push(currentLine);
+        currentLine = "<b>via</b>&nbsp;" + word;
+      } else {
+        // Push the current line and start a new one with the current word
+        labelLines.push(currentLine.trim());
+        currentLine = word;
+      }
+      isFirstLine = false;
+    }
+  });
+
+  // Push any remaining text in currentLine
+  if (currentLine.length > 0) {
+    labelLines.push(currentLine.trim());
+  }
+
+  // Join lines with <br/> for HTML line breaks
+  var label = `${labelLines.join('<br/>')}`;
+  return label;
+}
+
+
+function getAtoBviaC(abc_data)
+  {
         var abc = new Array();
         for (i = 0; i <abc_data.length; i++)
         {
@@ -374,7 +385,6 @@ function splitTextIntoLines(text, maxChar, html = false)
            var destID = getCurieFromIRI(destIRI);
            var destLabel = abc_data[i].B_Label.value;
            var dest = new ClassEntity(destID, destIRI, destLabel);
-    
     
            var via = new ClassEntity("", "", ""); 
     
@@ -396,24 +406,30 @@ function splitTextIntoLines(text, maxChar, html = false)
             target_organ = new ClassEntity(targetOrganID, targetOrganIRI, targetOrganLabel);
             }
 
-           var neuron_meta = npo_neurons_metadata.find(obj => obj.neuronID === neuron_id);
+           var neuron_meta = NPO_NEURON_METADATA.find(obj => obj.neuronID === neuron_id);
            
            var neuron_digraph = new NeuronPathDiGraph("", "");   
-           var digraph = npo_neuron_paths.find(obj=> obj.neuronID === neuron_id);
-           if (digraph){neuron_digraph = digraph;}
+           var digraph = NPO_NEURON_PATHS.find(obj=> obj.neuronID === neuron_id);
+           if (digraph)
+            {
+              neuron_digraph = digraph;
+            }
 
            // For neurons with synaptic forward connections
-           var neuron_digraph_with_synapse = new NeuronPathDiGraph("", "");   
-           var digraph_with_synapse = npo_neuron_paths_with_synapse.find(obj=> obj.neuronID === neuron_id);
-           if (digraph_with_synapse){neuron_digraph_with_synapse = digraph_with_synapse;}
 
+           var neuron_digraph_with_synapse = new NeuronPathDiGraph("", "");   
+           var digraph_with_synapse = NPO_NEURON_PATHS_WITH_SYNAPSE.find(obj=> obj.neuronID === neuron_id);
+           if (digraph_with_synapse)
+            {
+              neuron_digraph_with_synapse = digraph_with_synapse;
+            }
 
            var abcData = new AtoBviaC (neuronType, origin, dest, via, neuron_meta, target_organ, 
                                        neuron_digraph, neuron_digraph_with_synapse);
            abc.push(abcData);
         }
         return abc;
-    }
+  }
 
     function getNeuronsMetaData(neuronMetaData)
     {
@@ -518,20 +534,19 @@ function splitTextIntoLines(text, maxChar, html = false)
   
         return replacedURIs.join(", ");
     }
-
     
     populateNeuronIDs();
     function populateNeuronIDs()
     {
        //populate the distinct set of neuron IDs for auto-complete.
-       var neuron_ids = [...new Set(aToBviaC.map(obj => obj.neuron.ID))];
+       var neuron_ids = [...new Set(A_TO_B_VIA_C.map(obj => obj.neuron.ID))];
        autocomplete(document.getElementById("neuron-txt"), neuron_ids);
     }
 
     populateNeuronSpecies()
     function populateNeuronSpecies()
     {
-        var species = [...new Set(aToBviaC.map(obj => obj.neuronMetaData.species))];
+        var species = [...new Set(A_TO_B_VIA_C.map(obj => obj.neuronMetaData.species))];
         autocomplete(document.getElementById("species-txt"), species);
 
     }
@@ -553,15 +568,17 @@ function splitTextIntoLines(text, maxChar, html = false)
     populateNeuronTergetOrgans()
     function populateNeuronTergetOrgans()
     {
-        var target_organs = [...new Set(aToBviaC.map(obj => obj.targetOrgan.Label))];
+        var target_organs = [...new Set(A_TO_B_VIA_C.map(obj => obj.targetOrgan.Label))];
         autocomplete(document.getElementById("organ-txt"), target_organs);
     }
 
     function search(event)
      {
+
       event.preventDefault();
+
       var filtered_abc = new Array(); 
-      filtered_abc = aToBviaC;
+      filtered_abc = A_TO_B_VIA_C;
 
       const neuron_id = document.getElementById("neuron-txt").value.toLowerCase().trim();
       const species_id = document.getElementById("species-txt").value.trim();
@@ -628,16 +645,13 @@ function splitTextIntoLines(text, maxChar, html = false)
 
       var tableContainer = document.getElementById("table-container");
       var generatedTable = getPopulatedTable(filtered_abc);
-      tableContainer.innerHTML="";
+      tableContainer.innerHTML = "";
       tableContainer.appendChild (generatedTable);
-      // tableContainer.innerHTML = getPopulatedTable(filtered_abc).outerHTML;
-
 
       const resultsEnd = document.getElementById("query-results-end");
       var endMessage = "<hr><center>End of search results.</center><br><br>"
       resultsEnd.innerHTML = endMessage;
 
-    
       return;      
     }
 

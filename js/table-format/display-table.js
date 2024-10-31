@@ -1,23 +1,27 @@
 // Return the populated table based on the search filters.
-
-function getPopulatedTable(data) 
+// the data represents an array of 'AtoBviaC' class instances
+function getPopulatedTable(data)
 {
   const table = document.createElement("table");
   table.style.borderCollapse = "collapse";
   table.style.width = "1250px";
   table.style.border = "1px solid black";
 
+  const progressContainer = document.getElementById("search-progress-container");
+  progressContainer.style.display = "block";   // Show progress container
+  updateSearchProgress(0);
+
   const neuronDataMap = groupDataByNeuronID(data);
-
-  for (const [neuronId, neuronData] of neuronDataMap) 
+  const totalProgress = neuronDataMap.size; //number of neuron populations
+  let currentProgress = 0;
+  
+ for (const [neuronId, neuronData] of neuronDataMap) 
   {
-    var gData = neuronData[0].diGraph.axonalPath;
-    var gDataWithSynapse = neuronData[0].diGraphSynapse.axonalPath;
-    var hasSynapse = neuronData[0].neuronMetaData.forwardConnections;
+    var metaData = neuronData[0].neuronMetaData;
+    const vizRow = createVizRow(neuronData);
+    const neuronRow = createNeuronRow(neuronId, neuronData[0], vizRow);
 
-    const vizRow = createVizRow(gData, gDataWithSynapse, hasSynapse);
-    const neuronRow = createNeuronRow(neuronId, gData, vizRow);
-    const neuronDataRow = createNeuronDataRow(neuronData[0].neuronMetaData);
+    const neuronDataRow = createNeuronDataRow(metaData);
     const locationHeaderRow = createLocationHeaderRow();
     table.append(
       neuronRow,
@@ -27,6 +31,11 @@ function getPopulatedTable(data)
       ...createDataRows(neuronData)
     );
     table.appendChild(createEmptyRow());
+    
+    currentProgress++;
+    console.log(" Progress+ "+ (currentProgress/totalProgress)*100);
+    //await wait(5);
+    updateSearchProgress((currentProgress/totalProgress) * 100);
   }
 
   return table;
@@ -35,7 +44,8 @@ function getPopulatedTable(data)
 function groupDataByNeuronID(data)
 {
   const neuronDataMap = new Map();
-  for (const datum of data) {
+  for (const datum of data)
+  {
     if (!neuronDataMap.has(datum.neuron.ID))
     {
       neuronDataMap.set(datum.neuron.ID, []);
@@ -45,13 +55,15 @@ function groupDataByNeuronID(data)
   return neuronDataMap;
 }
 
-function createNeuronRow(neuronId, gData, vizRow)
+function createNeuronRow(neuronId, neuronData, vizRow)
 {
   const neuronRow = createTableRow("panel");
   const neuronHeader = createTableHeader("panel-header");
   neuronHeader.colSpan = 6;
   neuronHeader.innerHTML = `Neuron Population: ${neuronId}`;
   neuronHeader.style.cursor = 'default';
+
+  var gData = neuronData.diGraph.axonalPath;
   
   if (gData !== "")
   {
@@ -69,9 +81,14 @@ function createNeuronRow(neuronId, gData, vizRow)
   return neuronRow;
 }
 
-function createVizRow(gData, gDataWithSynapse, hasSynapse)
+//function createVizRow(gData, gDataWithSynapse, hasSynapse)
+function createVizRow(neuronData)
+
 {
-  if (gData !== "")
+  const gData = neuronData[0];
+  const hasSynapse = neuronData[0].neuronMetaData.forwardConnections;
+  
+  if (gData.diGraph.axonalPath !== "")
   {
     const vizRow = createTableRow("panel-body");
     vizRow.style.display = 'none';
@@ -97,7 +114,7 @@ function createVizRow(gData, gDataWithSynapse, hasSynapse)
    
     var divSynapse = document.createElement('div');
     divSynapse.id = "divSynapse";
-    divSynapse.appendChild (getVizWithSynapse(gDataWithSynapse));
+    divSynapse.appendChild (getVizWithSynapse(gData));
     divSynapse.style.display = 'none'; // Initially hide divSynapse
 
     vizData.appendChild(divSynapse);
@@ -130,55 +147,57 @@ function getVizWithoutSynapse(gData)
 {
   const div = document.createElement('div');
   div.id = "graphWithoutSynapse";
-  const graphSVG = Viz(gData); //calling the Viz constructor from GraphViz's viz.js
+  div.style = "display: flex; justify-content: center";
+  
+  const graphSVG = Viz(gData.diGraph.axonalPath); //calling the Viz constructor from GraphViz's viz.js
   div.innerHTML = graphSVG;
-
+  
   return div;
 }
 
-function getVizWithSynapse(gDataWithSynapse)
+function getVizWithSynapse(gData)
 {
   const div = document.createElement('div');
   div.id = "graphWithSynapse";
-  const graphSVG = Viz(gDataWithSynapse); //calling the Viz constructor from GraphViz's viz.js
+  div.style = "display: flex; justify-content: center";
+  
+  const graphSVG = Viz(gData.diGraphSynapse.axonalPath); //calling the Viz constructor from GraphViz's viz.js
   div.innerHTML = graphSVG;
 
   return div;
 }
 
-function getSynapseCheckBox()
+function getSynapseCheckBox() 
 {
-    const synapseDiv = document.createElement('div');
-    synapseDiv.style.display = 'inline-flex';     // Flexbox to align items horizontally
-    synapseDiv.style.alignItems = 'center';
-    synapseDiv.style.marginLeft = '10px';
-    synapseDiv.style.marginTop = '10px';
-    synapseDiv.style.marginBottom = '20px';
-  
-    // Create checkbox for synaptic connections
-    const synapseCheckbox = document.createElement('input');
-    synapseCheckbox.type = 'checkbox';
-    synapseCheckbox.id = 'synapseCheckbox';
-    synapseCheckbox.style.width = '25px';
-    synapseCheckbox.style.height = '25px';
-    synapseCheckbox.style.verticalAlign = 'middle';
+  const synapseDiv = document.createElement('div');
+  synapseDiv.id = 'syn-div';
+  synapseDiv.style = `display: flex; justify-content: center; align-items: center;
+                       margin: 10px auto 20px auto; width: fit-content;`;
 
-    // Create label for checkbox
-    const synapseLabel = document.createElement('label');
-    synapseLabel.htmlFor = 'synapseCheckbox';
-    synapseLabel.innerText = 'Show Synaptic Connections.';
-    synapseLabel.style.backgroundColor = '#C0F0FB'; 
-    synapseLabel.style.color = 'black';        
-    synapseLabel.style.padding = '5px 5px';
-    synapseLabel.style.cursor = 'pointer';
-    synapseLabel.style.verticalAlign = 'middle';
+  const synapseCheckbox = document.createElement('input');
+  synapseCheckbox.type = 'checkbox';
+  synapseCheckbox.id = 'synapseCheckbox';
+  synapseCheckbox.style.width = '25px';
+  synapseCheckbox.style.height = '25px';
+  synapseCheckbox.style.verticalAlign = 'middle';
 
-    // Append checkbox and label to the div
-    synapseDiv.appendChild(synapseCheckbox);
-    synapseDiv.appendChild(synapseLabel);
+  const synapseLabel = document.createElement('label');
+  synapseLabel.htmlFor = 'synapseCheckbox';
+  synapseLabel.innerText = 'Show Synaptic Connections';
+  synapseLabel.style.backgroundColor = '#C0F0FB'; 
+  synapseLabel.style.color = 'black';        
+  synapseLabel.style.padding = '5px 5px';
+  synapseLabel.style.cursor = 'pointer';
+  synapseLabel.style.verticalAlign = 'middle';
 
-    return synapseDiv;
+  // append checkbox and label to synapseDiv
+  synapseDiv.appendChild(synapseCheckbox);
+  synapseDiv.appendChild(synapseLabel);
+
+  return synapseDiv;
 }
+
+
 
 function getVizLegend()
 {
@@ -198,8 +217,10 @@ function getVizLegend()
                             legend_soma [label="Soma\nLocation", fontsize=12, shape=rect, style="rounded, filled", fillcolor="#eefaec", color=black];
                         }
                     }`
+  
   const div = document.createElement('div');
-  div.id = "graphLegend";
+
+  div.id = "graphLegend"; div.style="display: flex; justify-content: center;"
   const graphSVG = Viz(vizLegend); //calling the Viz constructor from GraphViz's viz.js
   div.innerHTML = graphSVG;
   
@@ -209,7 +230,7 @@ function getVizLegend()
 function createNeuronDataRow(neuronMetaData)
 {
   const neuronDataRow = createTableRow();
-  neuronDataRow.style.backgroundColor = "#EFF5FB";
+  neuronDataRow.style.backgroundColor = "#ffffff";
   const neuronMetaDataCell = createTableData();
   neuronMetaDataCell.colSpan = 6;
   neuronMetaDataCell.innerHTML = getFormattedNeuronMetaData(neuronMetaData);
@@ -242,28 +263,13 @@ function createLocationHeaderRow()
   return locationHeaderRow;
 }
 
-// function createDataRows(neuronData)
-// {
-//   return neuronData.map(datum => {
-//     const dataRow = createTableRow();
-//     dataRow.style.backgroundColor = "#EFF5FB";
-//     dataRow.appendChild(createTableData(datum.origin.Label));
-//     dataRow.appendChild(createTableData(createLink(datum.origin.IRI, datum.origin.ID)));
-//     dataRow.appendChild(createTableData(datum.destination.Label || "-"));
-//     dataRow.appendChild(createTableData(createLink(datum.destination.IRI, datum.destination.ID)));
-//     dataRow.appendChild(createTableData(datum.via ? datum.via.Label : "-"));
-//     dataRow.appendChild(createTableData(createLink(datum.via.IRI, datum.via.ID)));
-//     return dataRow;
-//   });
-// }
-
 // To create unique rows for each population.
 function createDataRows(neuronData) 
 {
   const uniqueData = new Set();
 
   return neuronData
-    .filter(datum => {
+    .filter(datum =>{
       // creating a unique key for each row, ensuring all relevant fields are consistently represented
       const key = [
         datum.origin.Label || "",
@@ -311,33 +317,6 @@ function createEmptyRow()
   return emptyRow;
 }
 
-// function getFormattedNeuronMetaData(nmdata) 
-// {
-//   let text = `<strong>Label:</strong> ` + nmdata.neuronLabel;
-
-//   if (nmdata.neuronPrefLabel !== "")
-//     text +=  `<hr><strong>Preferred Label</strong><pre>  </pre>` + nmdata.neuronPrefLabel; 
-
-//   text += `<hr><strong>Phenotype(s):</strong>` + nmdata.phenotypes;
-//   if (nmdata.species !== "")
-//     text += `<hr><b>Species:</b>` +  nmdata.species;
-
-//   if (nmdata.sex !== "")
-//     text += `; <b>Sex:</b>` + nmdata.sex;
-  
-//   if (nmdata.forwardConnections !== "")
-//     text += `<hr><b>Forward Connection(s):</b>` +  nmdata.forwardConnections;
-  
-//   if (nmdata.reference !== "")
-//     text += `<hr><b>Reference:</b>` +  addHyperlinksToURIs(nmdata.reference);
-  
-//   if (nmdata.alert !== "")
-//     text += `<hr><b>Alert Note:</b>` + addHyperlinksToURIs(nmdata.alert);
-
-//   text += "<br>";
-//   return text;
-// }
-
 function getFormattedNeuronMetaData(nmdata) 
 {
   let table = `<table style="border-collapse: collapse; width: 100%;">`;
@@ -357,17 +336,17 @@ function getFormattedNeuronMetaData(nmdata)
     // table += `<td>${convertToTitleCase(nmdata.neuronPrefLabel)}</td></tr>`;
   }
 
+
   table += `<tr><td style="font-weight: bold;">Phenotype(s)</td>`;
-  table += `<td>${nmdata.phenotypes}</td></tr>`;
+  table += `<td>${nmdata.phenotypes}`;
 
   if (nmdata.species !== "")
   {
-    table += `<tr><td style="font-weight: bold;">Species</td>`;
-    table += `<td>${nmdata.species}`;
+    table += `; <b>Species: </b>${nmdata.species}`;
     if (nmdata.sex !== "")
-      table += `; <b>Sex:</b> ${convertToTitleCase(nmdata.sex)}`;
-    table += `</td></tr>`;
+      table += `; <b>Sex: </b> ${convertToTitleCase(nmdata.sex)}`;
   }
+  table += `</td></tr>`;
 
   // if (nmdata.sex !== "") {
   //   table += `<tr><td style="font-weight: bold;">Sex:</td>`;
@@ -421,26 +400,28 @@ function convertToTitleCase(sentence)
 {
   const smallWords = ['a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'with',
                       'via', 'on', 'at', 'to', 'from', 'by', 'in', 'of'];
-  const words = sentence.toLowerCase().split(/[\s,]+/);
+  const words = sentence.split(/\s+/); // Split by whitespace
 
-  for (let i = 0; i < words.length; i++) 
-  {
-    const word = words[i];
-
-    if (i === 0 || !smallWords.includes(word)) 
+  for (let i = 0; i < words.length; i++)
     {
-      // Check if the word matches the pattern "X1-X9" or "X1-XN"
-      if (/^[a-z]\d+(-[a-z]\d+|-[a-z]n)?$/.test(word)) 
+    const word = words[i];
+    
+    // check for patterns like "S2‒S4" or "L1-L2" with any type of dash
+    if (/^[A-Za-z]\d+[-‒–][A-Za-z]?\d+$/.test(word))
+    {
+      words[i] = word.replace(/([A-Za-z]\d+[-‒–][A-Za-z]?\d+)/, match => match.toUpperCase());
+    } 
+    else if (i === 0 || !smallWords.includes(word.toLowerCase()))
       {
-        words[i] = word.toUpperCase(); // Preserve the pattern in uppercase
+      // convert to title case if it's not in the list of small words
+      words[i] = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
       } 
-      else 
-      {
-        words[i] = word.charAt(0).toUpperCase() + word.slice(1); // Convert other words to title case
-      }
+    else
+    {
+      // Convert small words to lowercase
+      words[i] = word.toLowerCase();
     }
   }
-
   return words.join(' ');
 }
 
@@ -480,7 +461,8 @@ function togglePanel(panelBodyRow)
 function createTableRow(className)
 {
   const row = document.createElement("tr");
-  if (className) {
+  if (className)
+  {
     row.classList.add(className);
   }
   return row;
@@ -489,7 +471,8 @@ function createTableRow(className)
 function createTableHeader(className)
 {
   const header = document.createElement("th");
-  if (className) {
+  if (className)
+  {
     header.classList.add(className);
   }
   return header;
@@ -499,7 +482,8 @@ function createTableData(content)
 {
   const data = document.createElement("td");
   data.style.border = "1px solid black";
-  if (content) {
+  if (content)
+  {
     data.innerHTML = content;
   }
   return data;
@@ -508,4 +492,27 @@ function createTableData(content)
 function createLink(href, text)
 {
   return `<a href="${href}" target="_blank">${text}</a>`;
+}
+
+  // get label from npo_neuron_metadata
+function getNeuronPrefLabelFromID(neuron_id)
+  {
+    console.log(`Searching for neuron ID: '${neuron_id}'`);
+
+    //const neuronData = NEURON_DATA_MAP.get(neuron_id);
+    console.log("Neuron Data" + NEURON_DATA[0].neuronMetaData.neuronPrefLabel);
+
+
+    return "TESTING"; // Return null if neuronId not found
+}
+
+function updateSearchProgress(percent)
+{
+    const progressBar = document.getElementById("search-progress-bar");
+    progressBar.style.width = percent + '%';
+}
+
+function wait(ms)
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
