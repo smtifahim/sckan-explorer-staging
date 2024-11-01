@@ -141,7 +141,7 @@ async function loadABCData()
             var htmlLabel = '<table border = "0" cellborder="0" cellspacing="2" cellpadding="5">';
                 // add an invisible row since graphviz does not support <br/> before the html table tag
                 htmlLabel += '<TR><TD BGCOLOR="white" HEIGHT="8" BORDER="0"></TD></TR>';
-                htmlLabel += "<tr><td BGCOLOR='#c7daff'><b>&nbsp;" + neuronAdj[0].neuron.ID + "</b>&nbsp;</td>";
+                htmlLabel += "<tr><td BGCOLOR= '#b1d6f8'><b>&nbsp;" + neuronAdj[0].neuron.ID + "</b>&nbsp;</td>";
                 htmlLabel += "<td BGCOLOR='#EFF5FB'>" + getFormattedNeuronLabel(neuronAdj[0].neuron.Label) + "</td></tr>";
                 htmlLabel += "</table>";
             
@@ -168,7 +168,7 @@ async function loadABCData()
           var htmlLabel = '<table border = "0" cellborder="0" cellspacing="2" cellpadding="5">';
           // add an invisible row since graphviz does not support <br/> before the html table tag
           htmlLabel += '<TR><TD BGCOLOR="white" HEIGHT="8" BORDER="0"></TD></TR>';
-          htmlLabel += "<tr><td BGCOLOR='#c7daff'><b>&nbsp;" + neuronAdj[0].neuron.ID + "</b>&nbsp;</td>";
+          htmlLabel += "<tr><td BGCOLOR='#b1d6f8'><b>&nbsp;" + neuronAdj[0].neuron.ID + "</b>&nbsp;</td>";
           htmlLabel += "<td BGCOLOR='#EFF5FB'>" + getFormattedNeuronLabel(neuronAdj[0].neuron.Label) + "</td></tr>";
           
       if (connected_neurons !== null)
@@ -180,7 +180,7 @@ async function loadABCData()
             var neuron_label = getNeuronLabelFromID(neuron_id);
             if ( neuron_id !== "")
             {            
-              htmlLabel += "<tr><td BGCOLOR='#c7daff'><b>&nbsp;" + neuron_id + "</b>&nbsp;</td>";
+              htmlLabel += "<tr><td BGCOLOR='#b1d6f8'><b>&nbsp;" + neuron_id + "</b>&nbsp;</td>";
               htmlLabel += "<td BGCOLOR='#EFF5FB'>" + getFormattedNeuronLabel(neuron_label) + "</td></tr>";
             }
           }
@@ -317,7 +317,8 @@ function splitTextIntoLines(text, maxChar, html = false)
   return html ? lines.join('<br/>') : lines.join('\n');
 }
 
-function getFormattedNeuronLabel(neuronLabel, maxChar = 100) {
+function getFormattedNeuronLabel(neuronLabel, maxChar = 110)
+{
   let labelLines = [];
   
   // Bold "to" and "via" and add a space after
@@ -330,24 +331,32 @@ function getFormattedNeuronLabel(neuronLabel, maxChar = 100) {
 
   words.forEach((word) => {
     // Check if we're on the first line and "via" is encountered
-    if (isFirstLine && word.toLowerCase() === "<b>via</b>&nbsp;") {
+    if (isFirstLine && word.toLowerCase() === "<b>via</b>&nbsp;")
+    {
       // Add the current line without "via" and start the next line with "via"
-      if (currentLine.trim().length > 0) {
+      if (currentLine.trim().length > 0)
+      {
         labelLines.push(currentLine.trim());
       }
       currentLine = word; // "via" starts the next line
       isFirstLine = false;
     }
-    else if (currentLine.length + word.length + 1 <= maxChar) {
+    else if (currentLine.length + word.length + 1 <= maxChar)
+    {
       // Add word to current line if within maxChar limit
       currentLine += (currentLine === "" ? "" : " ") + word;
-    } else {
+    } 
+    else
+    {
       // For subsequent lines, if "via" is the last word before maxChar, move it to the next line
-      if (currentLine.endsWith("<b>via</b>&nbsp;")) {
+      if (currentLine.endsWith("<b>via</b>&nbsp;"))
+      {
         currentLine = currentLine.slice(0, currentLine.lastIndexOf("<b>via</b>&nbsp;")).trim();
         labelLines.push(currentLine);
         currentLine = "<b>via</b>&nbsp;" + word;
-      } else {
+      }
+      else
+      {
         // Push the current line and start a new one with the current word
         labelLines.push(currentLine.trim());
         currentLine = word;
@@ -357,7 +366,8 @@ function getFormattedNeuronLabel(neuronLabel, maxChar = 100) {
   });
 
   // Push any remaining text in currentLine
-  if (currentLine.length > 0) {
+  if (currentLine.length > 0)
+  {
     labelLines.push(currentLine.trim());
   }
 

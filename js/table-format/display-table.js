@@ -4,25 +4,29 @@ function getPopulatedTable(data)
 {
   const table = document.createElement("table");
   table.style.borderCollapse = "collapse";
-  table.style.width = "1250px";
+  table.style.width = "70%";
   table.style.border = "1px solid black";
+ // table.style.borderRadius = "8px";
+ //  table.style.overflow = "hidden";
+
 
   const progressContainer = document.getElementById("search-progress-container");
   progressContainer.style.display = "block";   // Show progress container
   updateSearchProgress(0);
 
   const neuronDataMap = groupDataByNeuronID(data);
+  
   const totalProgress = neuronDataMap.size; //number of neuron populations
   let currentProgress = 0;
   
- for (const [neuronId, neuronData] of neuronDataMap) 
+  for (const [neuronId, neuronData] of neuronDataMap) 
   {
     var metaData = neuronData[0].neuronMetaData;
     const vizRow = createVizRow(neuronData);
     const neuronRow = createNeuronRow(neuronId, neuronData[0], vizRow);
-
     const neuronDataRow = createNeuronDataRow(metaData);
     const locationHeaderRow = createLocationHeaderRow();
+   
     table.append(
       neuronRow,
       neuronDataRow,
@@ -58,10 +62,16 @@ function groupDataByNeuronID(data)
 function createNeuronRow(neuronId, neuronData, vizRow)
 {
   const neuronRow = createTableRow("panel");
+
   const neuronHeader = createTableHeader("panel-header");
   neuronHeader.colSpan = 6;
-  neuronHeader.innerHTML = `Neuron Population: ${neuronId}`;
   neuronHeader.style.cursor = 'default';
+  neuronHeader.style.borderCollapse = "collapse";
+ // neuronHeader.style.borderTopLeftRadius = "8px";
+ // neuronHeader.style.borderTopRightRadius = "8px";
+  neuronHeader.style.overflow = "hidden";
+
+  neuronHeader.innerHTML = `Population: ${neuronId}`;
 
   var gData = neuronData.diGraph.axonalPath;
   
@@ -83,7 +93,6 @@ function createNeuronRow(neuronId, neuronData, vizRow)
 
 //function createVizRow(gData, gDataWithSynapse, hasSynapse)
 function createVizRow(neuronData)
-
 {
   const gData = neuronData[0];
   const hasSynapse = neuronData[0].neuronMetaData.forwardConnections;
@@ -94,7 +103,7 @@ function createVizRow(neuronData)
     vizRow.style.display = 'none';
     
     const vizData = createTableData("");
-    vizData.style.border = "none";
+    vizData.style.border = 'none';
     vizData.colSpan = 6;
     
     const synapseCheckbox = getSynapseCheckBox();
@@ -197,8 +206,6 @@ function getSynapseCheckBox()
   return synapseDiv;
 }
 
-
-
 function getVizLegend()
 {
   const vizLegend = `digraph G 
@@ -231,6 +238,7 @@ function createNeuronDataRow(neuronMetaData)
 {
   const neuronDataRow = createTableRow();
   neuronDataRow.style.backgroundColor = "#ffffff";
+
   const neuronMetaDataCell = createTableData();
   neuronMetaDataCell.colSpan = 6;
   neuronMetaDataCell.innerHTML = getFormattedNeuronMetaData(neuronMetaData);
@@ -319,7 +327,7 @@ function createEmptyRow()
 
 function getFormattedNeuronMetaData(nmdata) 
 {
-  let table = `<table style="border-collapse: collapse; width: 100%;">`;
+  let table = `<table style="width: 100%;">`;
 
   table += `<tr><td style="font-weight: bold; width: 25px;">Label</td>`;
   table += `<td style="width:90%">${nmdata.neuronLabel}</td></tr>`;
@@ -335,7 +343,6 @@ function getFormattedNeuronMetaData(nmdata)
     // Will need to consider if we want the pref label to be displayed in title case
     // table += `<td>${convertToTitleCase(nmdata.neuronPrefLabel)}</td></tr>`;
   }
-
 
   table += `<tr><td style="font-weight: bold;">Phenotype(s)</td>`;
   table += `<td>${nmdata.phenotypes}`;
