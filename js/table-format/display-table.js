@@ -4,7 +4,7 @@ function getPopulatedTable(data)
 {
   const table = document.createElement("table");
   table.style.borderCollapse = "collapse";
-  table.style.width = "70%";
+  table.style.width = "65%";
   table.style.border = "1px solid black";
  // table.style.borderRadius = "8px";
  //  table.style.overflow = "hidden";
