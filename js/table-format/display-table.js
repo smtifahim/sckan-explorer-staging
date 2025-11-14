@@ -514,6 +514,8 @@ function createEmptyRow()
 function getFormattedNeuronMetaData(nmdata)
 {
   let table = `<table class="metadata-header-table" style="width: 100%;">`;
+  let citationId = null;
+  let buttonId = null;
 
   table += `<tr><td style="font-weight: bold; width: 25px;">Label</td>`;
   table += `<td style="width:90%">${nmdata.neuronLabel}</td></tr>`;
@@ -521,13 +523,13 @@ function getFormattedNeuronMetaData(nmdata)
   // Will need to consider if we want the label to be displayed in title case
   // table += `<td style="width:90%">${convertToTitleCase(nmdata.neuronLabel)}</td></tr>`;
 
-  if (nmdata.neuronPrefLabel !== "") 
+  if (nmdata.neuronPrefLabel !== "")
   {
     table += `<tr><td style="font-weight: bold;">Preferred Label</td>`;
     table += `<td>${convertToTitleCase(nmdata.neuronPrefLabel)}</td></tr>`;
     //table += `<td>${getFormattedNeuronLabel(nmdata.neuronPrefLabel)}</td></tr>`;
 
-    
+
     // Will need to consider if we want the pref label to be displayed in title case
     // table += `<td>${convertToTitleCase(nmdata.neuronPrefLabel)}</td></tr>`;
   }
@@ -566,10 +568,10 @@ function getFormattedNeuronMetaData(nmdata)
     //         this.composerURI = composer_uri;
     //         this.curationNote = curation_note;
 
-  if (nmdata.expert !== "") 
+  if (nmdata.expert !== "")
   {
     table += `<tr><td style="font-weight: bold;">Expert Consultant</td>`;
-    table += `<td>${addHyperlinksToURIs(nmdata.expert)}</td></tr>`; 
+    table += `<td>${addHyperlinksToURIs(nmdata.expert)}</td></tr>`;
   }
 
 
@@ -578,11 +580,31 @@ function getFormattedNeuronMetaData(nmdata)
     table += `<tr><td style="font-weight: bold;">Reference</td>`;
     table += `<td>${addHyperlinksToURIs(nmdata.reference)}</td></tr>`;
   }
-  
+
   if (nmdata.citation !== "")
     {
+      citationId = `citation-${Math.random().toString(36).substring(2, 11)}`;
+      buttonId = `btn-${citationId}`;
+
+      // Split citations into array
+      const citationsArray = nmdata.citation.split(',').map(c => c.trim());
+      const maxVisible = 5;
+      const hasMore = citationsArray.length > maxVisible;
+
+      // Get visible and hidden citations
+      const visibleCitations = citationsArray.slice(0, maxVisible).join(', ');
+      const hiddenCitations = hasMore ? citationsArray.slice(maxVisible).join(', ') : '';
+
       table += `<tr><td style="font-weight: bold;">Citations</td>`;
-      table += `<td>${addHyperlinksToCitationURIs(nmdata.citation)}</td></tr>`;
+      table += `<td>
+        <div id="${citationId}">
+          <span class="citation-visible">${addHyperlinksToCitationURIs(visibleCitations)}</span>
+          ${hasMore ? `<span class="citation-hidden" style="display: none;">, ${addHyperlinksToCitationURIs(hiddenCitations)}</span>` : ''}
+        </div>
+        ${hasMore ? `<button id="${buttonId}" onclick="toggleCitations(event, '${citationId}')" style="margin-top: 4px; font-size: 12px; padding: 4px 8px; background-color: #2E9AFE; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          <b>Show ${citationsArray.length - maxVisible} more ▼</b>
+        </button>` : ''}
+      </td></tr>`;
     }
 
   if (nmdata.alert !== "")
@@ -598,6 +620,7 @@ function getFormattedNeuronMetaData(nmdata)
     }
 
   table += `</table>`;
+
   return table;
 }
 
@@ -779,4 +802,22 @@ function updateSearchProgress(percent)
 function wait(ms)
 {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Toggle citations expand/collapse
+function toggleCitations(event, citationId) {
+  const citationDiv = document.getElementById(citationId);
+  const button = event.target.closest('button');
+  const hiddenSpan = citationDiv.querySelector('.citation-hidden');
+
+  if (hiddenSpan) {
+    if (hiddenSpan.style.display === 'none') {
+      hiddenSpan.style.display = 'inline';
+      button.innerHTML = '<b>Show less ▲</b>';
+    } else {
+      hiddenSpan.style.display = 'none';
+      const totalHidden = hiddenSpan.textContent.split(',').length - 1; // -1 because first char is comma
+      button.innerHTML = `<b>Show ${totalHidden} more ▼</b>`;
+    }
+  }
 }
