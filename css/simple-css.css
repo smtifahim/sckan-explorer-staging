@@ -71,7 +71,7 @@ table {
   width: 600px;
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 12px 0 rgba(46, 154, 254, 0.08);
+  box-shadow: 0 4px 16px 0 rgba(123, 142, 161, 0.18);
   overflow: visible;
   pointer-events: auto !important;
 }
@@ -170,7 +170,7 @@ table tbody tr:hover th {
 /* Metadata table - more contrasting colors */
 .metadata-header-table {
   background-color: #ffffff !important;
-  border: 1px solid #d0e4f7 !important;
+  border: 1px solid #e1edfa !important;
   box-shadow: none !important;
   margin-top: 4px !important;
   margin-bottom: 8px !important;
