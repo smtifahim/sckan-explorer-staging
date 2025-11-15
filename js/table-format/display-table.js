@@ -175,9 +175,27 @@ function createNeuronRow(neuronId, neuronData, vizRow)
   if (gData !== "") {
     const visualizeButton = document.createElement('button');
     visualizeButton.innerHTML = '<b>Visualize</b>';
-    visualizeButton.style.backgroundColor = "#C0F0FB";
+    visualizeButton.style.backgroundColor = "#d0eaf6ff";
+    visualizeButton.style.color = "#05154fff";
+    visualizeButton.style.border = "none";
+    visualizeButton.style.borderRadius = "8px";
+    visualizeButton.style.padding = "8px 16px";
+    visualizeButton.style.fontSize = "14px";
+    visualizeButton.style.fontWeight = "600";
     visualizeButton.style.cursor = 'pointer';
     visualizeButton.style.marginLeft = '10px';
+    visualizeButton.style.transition = "all 0.2s ease";
+    visualizeButton.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+    visualizeButton.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = "#abfff9ff";
+      this.style.transform = "translateY(-1px)";
+      this.style.boxShadow = "0 4px 6px rgba(0,0,0,0.15)";
+    });
+    visualizeButton.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = "#abe6ffff";
+      this.style.transform = "translateY(0)";
+      this.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+    });
     visualizeButton.addEventListener('click', () => togglePanel(vizRow));
     neuronHeader.appendChild(visualizeButton);
   }
@@ -185,10 +203,29 @@ function createNeuronRow(neuronId, neuronData, vizRow)
   // Add Edit In Composer button if composerURI exists
   if (neuronData.neuronMetaData && neuronData.neuronMetaData.composerURI && neuronData.neuronMetaData.composerURI.trim() !== "") {
     const editButton = document.createElement('button');
-    editButton.innerHTML = '<b>Edit In Composer</b>';
-    editButton.style.backgroundColor = "#F9D5B3";
+    editButton.innerHTML = '<b>Edit in Composer</b>';
+    editButton.style.backgroundColor = "#cfddf2ff";
+    editButton.style.color = "#1d1b1bff";
+    editButton.style.border = "none";
+    editButton.style.borderRadius = "8px";
+    editButton.style.padding = "8px 16px";
+    editButton.style.fontSize = "14px";
+    editButton.style.fontWeight = "600";
     editButton.style.cursor = 'pointer';
-    editButton.style.marginLeft = '10px';
+    editButton.style.float = 'right';
+    editButton.style.marginRight = '10px';
+    editButton.style.transition = "all 0.2s ease";
+    editButton.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+    editButton.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = "#f9d266ff";
+      this.style.transform = "translateY(-1px)";
+      this.style.boxShadow = "0 4px 6px rgba(0,0,0,0.15)";
+    });
+    editButton.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = "#cfddf2ff";
+      this.style.transform = "translateY(0)";
+      this.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+    });
     editButton.addEventListener('click', (e) => {
       e.stopPropagation();
       window.open(neuronData.neuronMetaData.composerURI, '_blank');
