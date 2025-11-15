@@ -10,7 +10,11 @@ PREFIX ilxtr: <http://uri.interlex.org/tgbugs/uris/readable/>
 PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
 PREFIX NIFRID: <http://uri.neuinfo.org/nif/nifstd/readable/>
 
-SELECT DISTINCT ?Neuron_ID ?Connection_Type ?Location_IRI ?Location_Label
+SELECT DISTINCT
+# ?Neuron_ID
+?Connection_Type
+?Location_IRI
+?Location_Label
 {
     #FILTER (lcase(?Location_Label) = 'nodose ganglion')
     # FILTER (REGEX(str(?Neuron_ID), 'keast-1')).
