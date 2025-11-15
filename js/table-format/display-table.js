@@ -136,7 +136,7 @@ function getPopulatedTable(data)
     updateSearchProgress((currentProgress/totalProgress) * 100);
     // Throttle progress bar update to visually match chunking speed
     const start = Date.now();
-    while (Date.now() - start < 10) {} // ~5ms delay per update
+    while (Date.now() - start < 3) {} // ~5ms delay per update
   }
 
   return table;
@@ -795,7 +795,7 @@ function updateSearchProgress(percent)
   progressBar.style.textAlign = 'center';
   progressBar.style.color = 'white';
   progressBar.style.fontWeight = 'bold';
-  progressBar.style.fontSize = '12px';
+  progressBar.style.fontSize = '10px';
   progressBar.style.lineHeight = progressBar.style.height || '6px';
 }
 

@@ -760,9 +760,9 @@ function getAtoBviaC(abc_data)
     const oID = getStringAfterPipe(conn_origin);
     const dID = getStringAfterPipe(conn_dest);
     const vID = getStringAfterPipe(conn_via);
-    if (oID !== "") filters.push(obj => obj.destination.ID.includes(oID));
+    if (oID !== "") filters.push(obj => obj.origin.ID.includes(oID));
     if (dID !== "") filters.push(obj => obj.destination.ID.includes(dID));
-    if (vID !== "") filters.push(obj => obj.destination.ID.includes(vID));
+    if (vID !== "") filters.push(obj => obj.via.ID.includes(vID));
 
     // Use chunked filter for live progress
     filterWithProgress(
