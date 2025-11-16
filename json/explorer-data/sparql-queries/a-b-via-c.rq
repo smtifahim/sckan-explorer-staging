@@ -59,7 +59,7 @@ SELECT DISTINCT
                                     'lower respiratory tract', 'upper respiratory tract', 'digestive tract', 'male reproductive system', 'female reproductive system',
                                     'eye gland', 'endocrine gland', 'spinal cord', 'vagina', 'hemopoietic organ', 'skin of body', 'adrenal gland','buttock', 
                                     'penis', 'clitoris', 'prostate gland', 'seminal vesicle','pancreas','uterus', 'sweat gland', 'arterial system',
-				                    'scapular muscle', 'sphincter muscle', 'flexor muscle', 'muscle of shoulder', 'muscle organ', 
+				                            'scapular muscle', 'sphincter muscle', 'flexor muscle', 'muscle of shoulder', 'muscle organ', 
                                     'paravertebral ganglion', 'prevertebral ganglion')  #Note: although not an organ, ganglion is included for sckanner.        
                 )
     }

@@ -1,5 +1,5 @@
 # The query returns all the connected anatomical locations along with their synonyms based on the 
-# locational phenotype relations in SCKAN for SCKAN Explorer. 
+# locational phenotype relations in SCKAN for SCKAN Explorer and SCKAN NLI.
 # Version: November 12, 2025. Using rdf-star.
 
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
