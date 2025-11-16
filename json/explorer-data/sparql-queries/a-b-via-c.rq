@@ -20,7 +20,7 @@ SELECT DISTINCT
 # ?BR_X # ?BR_Label
 ?Target_Organ_IRI ?Target_Organ_Label
 {                
-   # FILTER (REGEX(str(?Neuron_ID), 'keast-1')).
+    #FILTER (REGEX(str(?Neuron_ID), 'keast-1')).
     ##  FILTER (?Target_Organ_Label = 'digestive tract').
     ## FILTER (regex (str(?Neuron_ID), 'aacar')).
     
@@ -32,9 +32,8 @@ SELECT DISTINCT
       <<?Neuron_ID ilxtr:hasSomaLocation ?A_IRI>> rdfs:label ?A_Label.
       Optional {<<?Neuron_ID ilxtr:hasAxonLocation ?C_IRI>> rdfs:label ?C_Label.}
       <<?Neuron_ID ilxtr:hasAxonTerminalLocation ?B_IRI>> rdfs:label ?B_Label.
-      Optional {<<?Neuron_ID  ?axon_terminal ?B_IRI>> ilxtr:hasRegion ?BR_X.}
+      <<?Neuron_ID  ?axon_terminal ?B_IRI>> ilxtr:hasRegion ?BR_X.
       #?BR_X rdfs:label ?BR_Label.
-
     }
 
     UNION  # unionize the neurons with sensory terminals with sensory axons leading to sensory terminals
@@ -43,14 +42,13 @@ SELECT DISTINCT
       <<?Neuron_ID ilxtr:hasSomaLocation ?A_IRI>> rdfs:label ?A_Label.
       Optional {<<?Neuron_ID ilxtr:hasAxonToSensoryTerminal ?C_IRI>> rdfs:label ?C_Label.}
       <<?Neuron_ID ilxtr:hasAxonSensoryLocation ?B_IRI>> rdfs:label ?B_Label.
-      Optional {<<?Neuron_ID  ?axon_terminal ?B_IRI>> ilxtr:hasRegion ?BR_X.}
-      #?BR_X rdfs:label ?BR_Label.
+      <<?Neuron_ID  ?axon_terminal ?B_IRI>> ilxtr:hasRegion ?BR_X.
     }
 
     OPTIONAL 
     { 
-
-        ?BR_X (rdfs:subClassOf* | ilxtr:isPartOf*)/rdfs:label | rdfs:label ?Target_Organ_Label.
+        ?BR_X rdfs:label ?BR_Label.
+        ?BR_X (rdfs:subClassOf* | ilxtr:isPartOf*) ?Target_Organ_IRI.
         ?Target_Organ_IRI rdfs:label ?Target_Organ_Label
                 
         FILTER (?Target_Organ_Label in ( 'heart', 'ovary', 'brain', 'urethra', 'esophagus', 'spinal cord', 'skin of body', 'lung', 'liver', 
@@ -59,9 +57,11 @@ SELECT DISTINCT
                                     'lower respiratory tract', 'upper respiratory tract', 'digestive tract', 'male reproductive system', 'female reproductive system',
                                     'eye gland', 'endocrine gland', 'spinal cord', 'vagina', 'hemopoietic organ', 'skin of body', 'adrenal gland','buttock', 
                                     'penis', 'clitoris', 'prostate gland', 'seminal vesicle','pancreas','uterus', 'sweat gland', 'arterial system',
-				                            'scapular muscle', 'sphincter muscle', 'flexor muscle', 'muscle of shoulder', 'muscle organ', 
-                                    'paravertebral ganglion', 'prevertebral ganglion')  #Note: although not an organ, ganglion is included for sckanner.        
-                )
+				                            'scapular muscle', 'sphincter muscle', 'flexor muscle', 'muscle of shoulder', 'muscle organ',
+                                    # added systems
+                                    'respiratory system', 'digestive system', 'endocrine system', 'lymphoid system', 'sense organ', 'renal system', 'integumental system',
+                                    'cardiovascular system')
+              )
     }
 }
 ORDER BY ?Neuron_ID ?A_Label ?B_Label ?C_Label

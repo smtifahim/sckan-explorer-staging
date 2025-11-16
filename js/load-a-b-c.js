@@ -543,23 +543,23 @@ function getAtoBviaC(abc_data)
            var neuron_phenotypes = "";
            if (neuronMetaData[i].hasOwnProperty("Phenotypes"))
            {
-              if (neuronMetaData[i].Phenotypes.value === "Pre ganglionic phenotype, Sympathetic phenotype" ||
-                  neuronMetaData[i].Phenotypes.value === "Sympathetic phenotype, Pre ganglionic phenotype")
-                neuron_phenotypes = "Sympathetic Pre-Ganglionic phenotype";
+              // if (neuronMetaData[i].Phenotypes.value === "Pre ganglionic phenotype, Sympathetic phenotype" ||
+              //     neuronMetaData[i].Phenotypes.value === "Sympathetic phenotype, Pre ganglionic phenotype")
+              //   neuron_phenotypes = "Sympathetic Pre-Ganglionic phenotype";
             
-              else if (neuronMetaData[i].Phenotypes.value === "Post ganglionic phenotype, Sympathetic phenotype" ||
-                      neuronMetaData[i].Phenotypes.value === "Sympathetic phenotype, Post ganglionic phenotype")
-                neuron_phenotypes = "Sympathetic Post-Ganglionic phenotype";
+              // else if (neuronMetaData[i].Phenotypes.value === "Post ganglionic phenotype, Sympathetic phenotype" ||
+              //         neuronMetaData[i].Phenotypes.value === "Sympathetic phenotype, Post ganglionic phenotype")
+              //   neuron_phenotypes = "Sympathetic Post-Ganglionic phenotype";
             
-              else if (neuronMetaData[i].Phenotypes.value === "Post ganglionic phenotype, Parasympathetic phenotype" ||
-                      neuronMetaData[i].Phenotypes.value === "Parasympathetic phenotype, Post ganglionic phenotype")
-                neuron_phenotypes = "Parasympathetic Post-Ganglionic phenotype";
+              // else if (neuronMetaData[i].Phenotypes.value === "Post ganglionic phenotype, Parasympathetic phenotype" ||
+              //         neuronMetaData[i].Phenotypes.value === "Parasympathetic phenotype, Post ganglionic phenotype")
+              //   neuron_phenotypes = "Parasympathetic Post-Ganglionic phenotype";
             
-              else if (neuronMetaData[i].Phenotypes.value === "Pre ganglionic phenotype, Parasympathetic phenotype" ||
-                      neuronMetaData[i].Phenotypes.value === "Parasympathetic phenotype, Pre ganglionic phenotype")
-                neuron_phenotypes = "Parasympathetic Pre-Ganglionic phenotype";
+              // else if (neuronMetaData[i].Phenotypes.value === "Pre ganglionic phenotype, Parasympathetic phenotype" ||
+              //         neuronMetaData[i].Phenotypes.value === "Parasympathetic phenotype, Pre ganglionic phenotype")
+              //   neuron_phenotypes = "Parasympathetic Pre-Ganglionic phenotype";
 
-              else
+              // else
                 neuron_phenotypes = neuronMetaData[i].Phenotypes.value;
            }
         
@@ -754,7 +754,8 @@ function getAtoBviaC(abc_data)
     const filters = [];
     if (model_id !== "") filters.push(obj => obj.neuron.ID.includes(model_id));
     if (phenotype !== "") filters.push(obj => obj.neuronMetaData.phenotypes.includes(phenotype));
-    if (organ_id !== "") filters.push(obj => obj.targetOrgan.Label.includes(organ_id));
+    // if (organ_id !== "") filters.push(obj => obj.targetOrgan.Label.includes(organ_id));
+    if (organ_id !== "") filters.push(obj => obj.targetOrgan && obj.targetOrgan.Label && obj.targetOrgan.Label.toLowerCase().trim() === organ_id)
     if (species_id !== "") filters.push(obj => obj.neuronMetaData.species.includes(species_id));
     if (neuron_id !== "") filters.push(obj => obj.neuron.ID.includes(neuron_id));
     const oID = getStringAfterPipe(conn_origin);
