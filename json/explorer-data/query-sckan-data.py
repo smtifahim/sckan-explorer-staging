@@ -26,7 +26,7 @@ db_name = 'SCKAN-NOV-2025'
 # File locations for the queries needed for SCKAN-Explorer
 query_files = [
                 './sparql-queries/sckan-all-locations.rq',
-              #  './sparql-queries/a-b-via-c.rq',
+                './sparql-queries/a-b-via-c.rq',
                 './sparql-queries/axonal-path-partial-order.rq',
                 './sparql-queries/neuron-metadata.rq',
                 './sparql-queries/sckan-version-info.rq'
@@ -34,11 +34,11 @@ query_files = [
 
 # File locations for the generated query results in json format
 generated_files = [
-                    './sckan-data/sckan-all-locations.json',
-                 #   './sckan-data/a-b-via-c.json',
-                    './sckan-data/axonal-path.json',
-                    './sckan-data/neuron-metadata.json',
-                    './sckan-data/sckan-version.json'
+                   './sckan-data/sckan-all-locations.json',
+                   './sckan-data/a-b-via-c.json',
+                   './sckan-data/axonal-path.json',
+                   './sckan-data/neuron-metadata.json',
+                   './sckan-data/sckan-version.json'
                   ]
 
 def checkServerStatus(admin):
